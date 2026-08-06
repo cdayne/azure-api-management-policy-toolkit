@@ -14,4 +14,12 @@ public class MockResponse : MockMessage, IResponse
     public int StatusCode { get; set; } = 200;
 
     public string StatusReason { get; set; } = "OK";
+
+    public MockResponse Clone() => new()
+    {
+        StatusCode = StatusCode,
+        StatusReason = StatusReason,
+        Headers = new Dictionary<string, string[]>(Headers),
+        Body = new MockBody { Content = Body.Content },
+    };
 }

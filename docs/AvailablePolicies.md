@@ -22,6 +22,8 @@ Notes:
 
 ## Implemented policies
 
+- ✅ append-header
+- ✅ append-query-parameter
 - ✅ authentication-basic
 - ✅ authentication-certificate
 - ✅ authentication-managed-identity
@@ -47,6 +49,7 @@ Notes:
 - ✅ include-fragment
 - ✅ inline-policy (method to insert raw XML)
 - ✅ invoke-dapr-binding (publish/send to Dapr bindings)
+- ✅ invoke-request
 - ✅ ip-filter
 - ✅ json-to-xml
 - ✅ jsonp

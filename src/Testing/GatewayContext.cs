@@ -16,9 +16,14 @@ public class GatewayContext : MockExpressionContext
     internal readonly SectionContextProxy<IOnErrorContext> OnErrorProxy;
     internal readonly CertificateStore CertificateStore = new();
     internal readonly CacheStore CacheStore = new();
+    internal readonly CacheInfo CacheInfo = new();
     internal readonly ResponseExampleStore ResponseExampleStore = new();
     internal readonly LoggerStore LoggerStore = new();
     internal readonly RateLimitStore RateLimitStore = new();
+    internal readonly TraceStore TraceStore = new();
+    internal readonly ForwardRequestStore ForwardRequestStore = new();
+    internal readonly BackendStore BackendStore = new();
+    internal readonly MetricStore MetricStore = new();
 
     /// <summary>
     /// Registry for pre-registered fragment instances used by the IncludeFragment policy.
