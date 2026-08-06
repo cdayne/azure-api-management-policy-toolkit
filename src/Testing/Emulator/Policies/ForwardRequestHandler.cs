@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring;
+using Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Expressions;
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Services;
 
 namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Policies;
@@ -13,6 +14,27 @@ internal class ForwardRequestHandler : PolicyHandlerOptionalParam<ForwardRequest
 
     protected override void Handle(GatewayContext context, ForwardRequestConfig? config)
     {
+        var mockResponse = context.ForwardRequestStore.GetNext();
+        if (mockResponse is not null)
+        {
+            context.Response = new MockResponse
+            {
+                StatusCode = mockResponse.StatusCode,
+                StatusReason = mockResponse.StatusReason
+            };
+            foreach (var (key, values) in mockResponse.Headers)
+            {
+                context.Response.Headers[key] = values;
+            }
+
+            if (mockResponse.Body is not null)
+            {
+                context.Response.Body.Content = mockResponse.Body;
+            }
+
+            return;
+        }
+
         var httpClient = context.Services.Resolve<IHttpClient>();
         if (httpClient is null)
         {

@@ -6,6 +6,7 @@ using System.Net;
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring;
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Testing;
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Document;
+using Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Data;
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Services;
 
 namespace Test.Emulator.Emulator.Policies;
@@ -24,6 +25,14 @@ public class ForwardRequestTests
 
         public void Outbound(IOutboundContext context) { }
         public void OnError(IOnErrorContext context) { }
+    }
+
+    class ForwardRequestWithConfig : IDocument
+    {
+        public void Backend(IBackendContext context)
+        {
+            context.ForwardRequest(new ForwardRequestConfig { Timeout = 60 });
+        }
     }
 
     [TestMethod]
@@ -98,5 +107,50 @@ public class ForwardRequestTests
         // Assert
         stubClient.LastRequest.Should().NotBeNull();
         stubClient.LastRequest!.RequestUri!.ToString().Should().StartWith("https://backend.example.com");
+    }
+
+    [TestMethod]
+    public void ForwardRequest_UsesConfiguredMockResponse()
+    {
+        var test = new SimpleForwardRequest().AsTestDocument();
+        test.SetupForwardRequest().ReturnsDefault(new MockBackendResponse
+        {
+            StatusCode = 201,
+            StatusReason = "Created",
+            Body = "mock-body"
+        });
+
+        test.RunBackend();
+
+        test.Context.Response.StatusCode.Should().Be(201);
+        test.Context.Response.Body.Content.Should().Be("mock-body");
+    }
+
+    [TestMethod]
+    public void ForwardRequest_SequentialResponses()
+    {
+        var test = new SimpleForwardRequest().AsTestDocument();
+        test.SetupForwardRequest()
+            .Returns(new MockBackendResponse { StatusCode = 200, Body = "first" })
+            .Returns(new MockBackendResponse { StatusCode = 201, Body = "second" });
+
+        test.RunBackend();
+        test.Context.Response.StatusCode.Should().Be(200);
+        test.Context.Response.Body.Content.Should().Be("first");
+
+        test.RunBackend();
+        test.Context.Response.StatusCode.Should().Be(201);
+        test.Context.Response.Body.Content.Should().Be("second");
+    }
+
+    [TestMethod]
+    public void ForwardRequest_WithConfig_UsesConfiguredMockResponse()
+    {
+        var test = new ForwardRequestWithConfig().AsTestDocument();
+        test.SetupForwardRequest().ReturnsDefault(new MockBackendResponse { StatusCode = 204 });
+
+        test.RunBackend();
+
+        test.Context.Response.StatusCode.Should().Be(204);
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring;
@@ -8,13 +8,13 @@ namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Document;
 
 public static class MockSetQueryParameterProvider
 {
-    public static Setup SetQueryParameter(this MockPoliciesProvider<IInboundContext> mock) =>
+    public static Setup SetQueryParameter<T>(this MockPoliciesProvider<T> mock) where T : class =>
         SetQueryParameter(mock, (_, _, _) => true);
 
-    public static Setup SetQueryParameter(
-        this MockPoliciesProvider<IInboundContext> mock,
+    public static Setup SetQueryParameter<T>(
+        this MockPoliciesProvider<T> mock,
         Func<GatewayContext, string, string[], bool> predicate
-    )
+    ) where T : class
     {
         var handler = mock.SectionContextProxy.GetHandler<SetQueryParameterHandler>();
         return new Setup(predicate, handler);

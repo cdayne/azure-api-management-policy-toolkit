@@ -17,7 +17,8 @@ internal class RateLimitByKeyHandler : PolicyHandler<RateLimitByKeyConfig>
         var limiter = context.Services.Resolve<IRateLimiter>();
         if (limiter is not null)
         {
-            var allowed = limiter.TryConsumeAsync(config.CounterKey, config.IncrementCount ?? 1).GetAwaiter().GetResult();
+            var permits = (config.IncrementCondition ?? true) ? config.IncrementCount ?? 1 : 0;
+            var allowed = limiter.TryConsumeAsync(config.CounterKey, permits).GetAwaiter().GetResult();
             if (!allowed)
             {
                 if (config.RetryAfterVariableName is not null)

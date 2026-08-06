@@ -34,4 +34,16 @@ public static class TestDocumentExtensions
 
     public static RateLimitStore SetupRateLimitStore(this TestDocument document) =>
         document.Context.RateLimitStore;
+
+    public static TraceStore SetupTraceStore(this TestDocument document) =>
+        document.Context.TraceStore;
+
+    public static ForwardRequestStore SetupForwardRequest(this TestDocument document) =>
+        document.Context.ForwardRequestStore;
+
+    public static BackendStore SetupBackendStore(this TestDocument document) =>
+        document.Context.BackendStore;
+
+    public static MetricStore SetupMetricStore(this TestDocument document) =>
+        document.Context.MetricStore;
 }

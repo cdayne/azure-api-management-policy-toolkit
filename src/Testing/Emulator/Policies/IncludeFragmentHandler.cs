@@ -11,15 +11,12 @@ namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Policies;
     Section(nameof(IOutboundContext)),
     Section(nameof(IOnErrorContext))
 ]
-internal class IncludeFragmentHandler : IPolicyHandler
+internal class IncludeFragmentHandler : PolicyHandler<string>
 {
-    public string PolicyName => nameof(IInboundContext.IncludeFragment);
+    public override string PolicyName => nameof(IInboundContext.IncludeFragment);
 
-    public object? Handle(GatewayContext context, object?[]? args)
+    protected override void Handle(GatewayContext context, string fragmentId)
     {
-        var fragmentId = args?.FirstOrDefault()?.ToString()
-            ?? throw new InvalidOperationException("Fragment ID is required for IncludeFragment.");
-
         // 1. Check pre-registered fragments first
         if (!context.FragmentRegistry.TryGetValue(fragmentId, out var fragment))
         {
@@ -33,7 +30,6 @@ internal class IncludeFragmentHandler : IPolicyHandler
         }
 
         ExecuteFragment(fragment, context);
-        return null;
     }
 
     private static Type? FindFragmentType(string fragmentId)

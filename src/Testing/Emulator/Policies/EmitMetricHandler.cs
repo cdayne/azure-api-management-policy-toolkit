@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring;
+using Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Data;
 
 namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Policies;
 
@@ -16,8 +17,12 @@ internal class EmitMetricHandler : PolicyHandler<EmitMetricConfig>
 
     protected override void Handle(GatewayContext context, EmitMetricConfig config)
     {
-        // No-op by default in emulator.
-        // Metric emission is not simulated in tests.
-        // Test authors use CallbackSetup to inspect emitted metrics.
+        var metric = new EmittedMetric(
+            config.Name,
+            config.Value ?? 1,
+            config.Namespace,
+            config.Dimensions);
+
+        context.MetricStore.MetricsInternal.Add(metric);
     }
 }

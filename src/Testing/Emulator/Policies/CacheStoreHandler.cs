@@ -10,8 +10,8 @@ namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Policies;
 internal class CacheStoreHandler : IPolicyHandler
 {
     public List<Tuple<
-        Func<GatewayContext, uint, bool, bool>,
-        Action<GatewayContext, uint, bool>
+        Func<GatewayContext, int, bool, bool>,
+        Action<GatewayContext, int, bool>
     >> CallbackHooks { get; } = new();
 
     public string PolicyName => nameof(IOutboundContext.CacheStore);
@@ -33,19 +33,30 @@ internal class CacheStoreHandler : IPolicyHandler
         return null;
     }
 
-    protected void Handle(GatewayContext context, uint duration, bool cacheResponse)
+    protected void Handle(GatewayContext context, int duration, bool cacheResponse)
     {
         if (!cacheResponse)
         {
             return;
         }
 
+        if (!string.Equals(context.Request.Method, "GET", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (context.Request.Headers.ContainsKey("Authorization") && !context.CacheInfo.AllowPrivateResponseCaching)
+        {
+            return;
+        }
+
+        var key = context.CacheInfo.BuildCacheKey(context.Request);
+
         var cache = context.Services.Resolve<ICache>();
         if (cache is not null)
         {
-            var cacheKey = context.Request.Url.ToString();
             cache.SetAsync(
-                cacheKey,
+                key,
                 new CachedResponse
                 {
                     StatusCode = context.Response.StatusCode,
@@ -57,34 +68,33 @@ internal class CacheStoreHandler : IPolicyHandler
             return;
         }
 
-        var store = context.CacheStore.GetCache("prefer-external");
+        var store = context.CacheStore.GetCache(context.CacheInfo.CachingType);
         if (store is null)
         {
             return;
         }
 
-        var cacheStoreKey = context.Request.Url.ToString();
-        store[cacheStoreKey] = new Data.CacheValue(context.Response, (int)duration);
+        store[key] = new Data.CacheValue(context.Response.Clone(), duration);
     }
 
-    private static (uint, bool) ExtractParameters(object?[]? args)
+    private static (int, bool) ExtractParameters(object?[]? args)
     {
         if (args is not { Length: 1 or 2 })
         {
             throw new ArgumentException("Expected 1 or 2 arguments", nameof(args));
         }
 
-        if (args[0] is not uint duration)
+        if (args[0] is not int duration)
         {
-            throw new ArgumentException($"Expected {typeof(uint).Name} as first argument", nameof(args));
+            throw new ArgumentException($"Expected {typeof(int).Name} as first argument", nameof(args));
         }
 
-        if (args.Length != 2)
+        if (args.Length != 2 || args[1] is null)
         {
             return (duration, true);
         }
 
-        if (args[0] is not bool cacheValue)
+        if (args[1] is not bool cacheValue)
         {
             throw new ArgumentException($"Expected {typeof(bool).Name} as second argument", nameof(args));
         }

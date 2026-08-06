@@ -50,6 +50,7 @@ internal class SectionContextProxy<TSection> : DispatchProxy where TSection : cl
         }
         catch (FinishSectionProcessingException) { throw; }
         catch (PolicyException) { throw; }
+        catch (BadRuntimeConfigurationException) { throw; }
         catch (Exception e)
         {
             throw new PolicyException(e) { Policy = targetMethod.Name, Section = _sectionName, PolicyArgs = args };
