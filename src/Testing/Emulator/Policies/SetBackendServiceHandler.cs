@@ -21,8 +21,7 @@ internal class SetBackendServiceHandler : PolicyHandler<SetBackendServiceConfig>
     {
         if (config.BaseUrl is not null)
         {
-            context.BackendUrl = config.BaseUrl;
-            context.Api.ServiceUrl = new MockUrl(new Uri(config.BaseUrl));
+            SetBackendUrl(context, config.BaseUrl);
         }
         else if (config.BackendId is not null)
         {
@@ -35,8 +34,13 @@ internal class SetBackendServiceHandler : PolicyHandler<SetBackendServiceConfig>
                 };
             }
 
-            context.BackendUrl = backend.Url;
-            context.Api.ServiceUrl = new MockUrl(new Uri(backend.Url));
+            SetBackendUrl(context, backend.Url);
         }
+    }
+
+    private static void SetBackendUrl(GatewayContext context, string url)
+    {
+        context.BackendUrl = url;
+        context.Api.ServiceUrl = new MockUrl(new Uri(url));
     }
 }

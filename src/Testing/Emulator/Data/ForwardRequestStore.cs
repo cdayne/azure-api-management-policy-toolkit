@@ -4,10 +4,10 @@
 namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Data;
 
 /// <summary>
-/// Queues mock responses for the forward-request policy. Consulted by <c>ForwardRequestHandler</c>
-/// only after its own per-call <c>ForwardRequest().Returns(...)</c>/<c>ReturnsDefault(...)</c> setup (on
-/// <see cref="Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Document.MockForwardRequestProvider.Setup"/>)
-/// finds no match, so a handler-level default always takes precedence over anything queued here.
+/// Queues mock responses for the forward-request policy. <c>ForwardRequestHandler</c> calls
+/// <see cref="GetNext"/> once per invocation: a queued response (via <see cref="Returns"/>) is
+/// consumed first, falling back to the default set via <see cref="ReturnsDefault"/> once the
+/// queue is empty, and falling back to a real HTTP call if neither is set.
 /// </summary>
 public class ForwardRequestStore
 {
@@ -21,10 +21,7 @@ public class ForwardRequestStore
         return this;
     }
 
-    /// <summary>
-    /// Sets the response returned once the queue is empty. Ignored if
-    /// <c>ForwardRequest().ReturnsDefault(...)</c> was also set — that one wins.
-    /// </summary>
+    /// <summary>Sets the response returned once the queue is empty.</summary>
     public ForwardRequestStore ReturnsDefault(MockBackendResponse response)
     {
         _defaultResponse = response;
