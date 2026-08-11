@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring;
@@ -11,10 +11,10 @@ public static class MockForwardRequestProvider
     public static Setup ForwardRequest(this MockPoliciesProvider<IBackendContext> mock) =>
         ForwardRequest(mock, (_, _) => true);
 
-    public static Setup ForwardRequest<T>(
-        this MockPoliciesProvider<T> mock,
+    public static Setup ForwardRequest(
+        this MockPoliciesProvider<IBackendContext> mock,
         Func<GatewayContext, ForwardRequestConfig?, bool> predicate
-    ) where T : class
+    )
     {
         var handler = mock.SectionContextProxy.GetHandler<ForwardRequestHandler>();
         return new Setup(predicate, handler);
