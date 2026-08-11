@@ -43,27 +43,11 @@ internal class AuthenticationManagedIdentityHandler : PolicyHandler<ManagedIdent
     }
 
     private string CreateTokenByHook(Func<string, string?, string> tokenProvider,
-        ManagedIdentityAuthenticationConfig config)
-    {
-        string token;
-        try
-        {
-            token = tokenProvider(config.Resource, config.ClientId);
-        }
-        catch
-        {
-            if (config.IgnoreError ?? false)
-            {
-                token = "";
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return token;
-    }
+        ManagedIdentityAuthenticationConfig config) =>
+        IgnoreErrorExtensions.InvokeOrFallback(
+            () => tokenProvider(config.Resource, config.ClientId),
+            config.IgnoreError ?? false,
+            fallback: "");
 
     private string DefaultTokenProvider(string resourceId, string? clientId)
     {
