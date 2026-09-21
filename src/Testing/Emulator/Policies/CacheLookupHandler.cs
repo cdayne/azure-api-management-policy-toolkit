@@ -15,6 +15,14 @@ internal class CacheLookupHandler : PolicyHandler<CacheLookupConfig>
     protected override void Handle(GatewayContext context, CacheLookupConfig config)
     {
         context.CacheInfo.Capture(config);
+
+        if (!string.Equals(context.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) ||
+            (context.Request.Headers.ContainsKey("Authorization") && !context.CacheInfo.AllowPrivateResponseCaching))
+        {
+            context.Variables["__cache_hit"] = false;
+            return;
+        }
+
         var key = context.CacheInfo.BuildCacheKey(context.Request);
         context.Variables["__cache_lookup_key"] = key;
 
@@ -25,6 +33,7 @@ internal class CacheLookupHandler : PolicyHandler<CacheLookupConfig>
             if (ResponseUtilities.TryCopyCachedResponse(cachedValue, context.Response))
             {
                 context.Variables["__cache_hit"] = true;
+                context.ResponseTerminated = true;
                 throw new FinishSectionProcessingException();
             }
 
@@ -43,6 +52,7 @@ internal class CacheLookupHandler : PolicyHandler<CacheLookupConfig>
         {
             ResponseUtilities.Copy(cachedResponse, context.Response);
             context.Variables["__cache_hit"] = true;
+            context.ResponseTerminated = true;
             throw new FinishSectionProcessingException();
         }
 

@@ -71,13 +71,13 @@ internal class RateLimitByKeyHandler : PolicyHandler<RateLimitByKeyConfig>
             throw new FinishSectionProcessingException();
         }
 
+        var incrementCount = incrementCondition ? config.IncrementCount ?? 1 : 0;
         if (incrementCondition)
         {
-            var incrementCount = config.IncrementCount ?? 1;
             context.RateLimitStore.Increment(counterKey, incrementCount);
         }
 
-        var remaining = Math.Max(0, config.Calls - currentCount - 1);
+        var remaining = Math.Max(0, config.Calls - currentCount - incrementCount);
 
         if (config.RemainingCallsHeaderName is not null)
         {

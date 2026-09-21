@@ -20,9 +20,9 @@ internal class EmitMetricHandler : PolicyHandler<EmitMetricConfig>
         var metric = new EmittedMetric(
             config.Name,
             config.Value ?? 1,
-            config.Namespace,
+            config.Namespace ?? "apim",
             config.Dimensions);
 
-        context.MetricStore.MetricsInternal.Add(metric);
+        context.MetricStore.Add(metric);
     }
 }

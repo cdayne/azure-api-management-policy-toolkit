@@ -7,7 +7,9 @@ namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Data;
 
 public class MetricStore
 {
-    internal readonly IList<EmittedMetric> MetricsInternal = new List<EmittedMetric>();
+    private readonly List<EmittedMetric> _metrics = new();
 
-    public ImmutableArray<EmittedMetric> Metrics => MetricsInternal.ToImmutableArray();
+    public ImmutableArray<EmittedMetric> Metrics => _metrics.ToImmutableArray();
+
+    internal void Add(EmittedMetric metric) => _metrics.Add(metric);
 }

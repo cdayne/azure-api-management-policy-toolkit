@@ -42,7 +42,8 @@ internal class CacheInfo
             {
                 if (request.Headers.TryGetValue(header, out var values))
                 {
-                    sb.Append($";h:{header}={string.Join(",", values)}");
+                    var encodedValues = string.Join(",", values.Select(Uri.EscapeDataString));
+                    sb.Append($";h:{Uri.EscapeDataString(header)}={encodedValues}");
                 }
             }
         }
@@ -53,7 +54,8 @@ internal class CacheInfo
             {
                 if (request.Url.Query.TryGetValue(param, out var values))
                 {
-                    sb.Append($";q:{param}={string.Join(",", values)}");
+                    var encodedValues = string.Join(",", values.Select(Uri.EscapeDataString));
+                    sb.Append($";q:{Uri.EscapeDataString(param)}={encodedValues}");
                 }
             }
         }

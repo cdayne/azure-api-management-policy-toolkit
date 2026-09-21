@@ -104,7 +104,7 @@ public class CacheLookupTests
         test.Context.Request.Url.Query["id"] = ["42"];
         var cachedResponse = new MockResponse { StatusCode = 200 };
         var expectedKey =
-            $"{test.Context.Request.Url};h:Accept=application/json;q:id=42";
+            $"{test.Context.Request.Url};h:Accept=application%2Fjson;q:id=42";
         test.SetupCacheStore().WithInternalCacheValue(expectedKey, cachedResponse);
 
         test.RunInbound();
