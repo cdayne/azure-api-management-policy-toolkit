@@ -153,4 +153,40 @@ public class ForwardRequestTests
 
         test.Context.Response.StatusCode.Should().Be(204);
     }
+
+    [TestMethod]
+    public void ForwardRequest_ForwardsRequestBody()
+    {
+        // Arrange
+        var test = new SimpleForwardRequest().AsTestDocument();
+        test.Context.Request.Body.Content = "payload";
+        var stubClient = new StubHttpClient(req => new HttpResponseMessage(HttpStatusCode.OK));
+        test.Context.Services.Register<IHttpClient>(stubClient);
+
+        // Act
+        test.RunBackend();
+
+        // Assert
+        stubClient.LastRequest!.Content.Should().NotBeNull();
+        stubClient.LastRequest.Content!.ReadAsStringAsync().Result.Should().Be("payload");
+    }
+
+    [TestMethod]
+    public void ForwardRequest_DoesNotForwardConsumedRequestBody()
+    {
+        // Arrange
+        // API Management loses the original body once it's read without preserveContent.
+        var test = new SimpleForwardRequest().AsTestDocument();
+        test.Context.Request.Body.Content = "payload";
+        test.Context.Request.Body.As<string>();
+        var stubClient = new StubHttpClient(req => new HttpResponseMessage(HttpStatusCode.OK));
+        test.Context.Services.Register<IHttpClient>(stubClient);
+
+        // Act
+        test.RunBackend();
+
+        // Assert
+        stubClient.LastRequest.Should().NotBeNull();
+        stubClient.LastRequest!.Content.Should().BeNull();
+    }
 }

@@ -3,6 +3,8 @@
 
 using System.Text;
 
+using Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions;
+
 namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Expressions.Extensions;
 
 [TestClass]
@@ -24,6 +26,45 @@ public class BasicAuthCredentialsParserTests
     }
 
     [TestMethod]
+    public void MockBasicAuthCredentials_ShouldKeepUsernameAsPositionalParameter()
+    {
+        // Arrange
+#pragma warning disable CS0618
+        var credentials = new MockBasicAuthCredentials(Username: "user", Password: "password");
+
+        // Act
+        var renamed = credentials with { Username = "other" };
+        var (username, password) = credentials;
+#pragma warning restore CS0618
+
+        // Assert
+        credentials.UserId.Should().Be("user");
+        renamed.UserId.Should().Be("other");
+        (credentials with { UserId = "id" }).UserId.Should().Be("id");
+        username.Should().Be("user");
+        password.Should().Be("password");
+    }
+
+    [TestMethod]
+    public void BasicAuthCredentials_ShouldDefaultUserIdToUsernameOfExistingImplementations()
+    {
+        // Arrange
+        BasicAuthCredentials credentials = new LegacyCredentials();
+
+        // Act
+        var userId = credentials.UserId;
+
+        // Assert
+        userId.Should().Be("user");
+    }
+
+    private sealed class LegacyCredentials : BasicAuthCredentials
+    {
+        public string Username => "user";
+        public string Password => "password";
+    }
+
+    [TestMethod]
     public void BasicAuthCredentialsParser_ShouldReturnFilledObject()
     {
         // Arrange
@@ -36,7 +77,20 @@ public class BasicAuthCredentialsParserTests
         // Assert
         result.Should().NotBeNull();
         result!.Password.Should().Be("password");
-        result!.Username.Should().Be("username");
+        result!.UserId.Should().Be("username");
+#pragma warning disable CS0618 // The obsolete Username still returns UserId.
+        result.Username.Should().Be("username");
+#pragma warning restore CS0618
+    }
+
+    [TestMethod]
+    public void MockBasicAuthCredentials_ShouldExposeObsoleteUsername()
+    {
+        var credentials = new MockBasicAuthCredentials("user", "password");
+
+#pragma warning disable CS0618 // The obsolete Username still returns UserId.
+        credentials.Username.Should().Be("user");
+#pragma warning restore CS0618
     }
 
     [TestMethod]
@@ -52,7 +106,7 @@ public class BasicAuthCredentialsParserTests
         // Assert
         result.Should().NotBeNull();
         result!.Password.Should().Be("password");
-        result!.Username.Should().Be("user:name");
+        result!.UserId.Should().Be("user:name");
     }
 
     [TestMethod]
@@ -68,6 +122,6 @@ public class BasicAuthCredentialsParserTests
         // Assert
         result.Should().NotBeNull();
         result!.Password.Should().Be("password");
-        result!.Username.Should().Be("¡usernameÿ");
+        result!.UserId.Should().Be("¡usernameÿ");
     }
 }
