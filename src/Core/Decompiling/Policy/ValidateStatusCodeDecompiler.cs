@@ -14,7 +14,7 @@ public class ValidateStatusCodeDecompiler : IPolicyDecompiler
         var prefix = PolicyDecompilerContext.GetContextPrefix(element, contextVar);
         var props = new List<string>();
         context.AddRequiredStringProp(props, element, "unspecified-status-code-action", "UnspecifiedStatusCodeAction");
-        context.AddOptionalStringProp(props, element, "error-variable-name", "ErrorVariableName");
+        context.AddOptionalStringProp(props, element, "errors-variable-name", "ErrorsVariableName");
 
         PolicyDecompilerContext.EmitConfigCall(writer, prefix, "ValidateStatusCode", "ValidateStatusCodeConfig", props);
     }
