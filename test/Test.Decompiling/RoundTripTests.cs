@@ -352,6 +352,16 @@ public class RoundTripTests
         csharp.Should().Contain("context.NamedValue(", "named value tokens should be converted to NamedValue calls");
     }
 
+    [TestMethod]
+    [DataRow("""<outbound><validate-status-code unspecified-status-code-action="prevent" errors-variable-name="errors"><status-code code="200" action="ignore" /><status-code code="404" action="detect" /></validate-status-code></outbound>""",
+        DisplayName = "validate-status-code with status codes")]
+    [DataRow("""<inbound><validate-jwt header-name="Authorization"><openid-config url="https://login.example/.well-known/openid-configuration" validate-connectivity="false" /></validate-jwt></inbound>""",
+        DisplayName = "validate-jwt openid-config validate-connectivity")]
+    public void PolicyChildElements_RoundTrip(string sections)
+    {
+        AssertRoundTrip($"<policies>{sections}</policies>");
+    }
+
     private static void AssertRoundTrip(string originalXml)
     {
         // Step 1: Normalize the original XML through the same serialization pipeline
