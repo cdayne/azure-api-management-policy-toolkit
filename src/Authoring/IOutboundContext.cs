@@ -213,6 +213,16 @@ public interface IOutboundContext : IHaveExpressionContext
     void LimitConcurrency(LimitConcurrencyConfig config, Action section);
 
     /// <summary>
+    /// Evaluates the content safety of a response using a Language Model (LLM) service.<br/>
+    /// This policy can be used to ensure that responses adhere to specified safety standards.<br/>
+    /// Compiled to <a href="https://learn.microsoft.com/en-us/azure/api-management/llm-content-safety-policy">llm-content-safety</a> policy.
+    /// </summary>
+    /// <param name="config">
+    /// Configuration specifying the backend service ID, optional shield prompt setting, content safety categories, and block lists.
+    /// </param>
+    void LlmContentSafety(LlmContentSafetyConfig config);
+
+    /// <summary>
     /// Stores the current LLM request and response in the semantic cache for future lookup.<br/>
     /// This policy must be placed in the outbound section to capture both the request and response.<br/>
     /// When stored, the entries can later be found by the llm-semantic-cache-lookup policy.<br/>
