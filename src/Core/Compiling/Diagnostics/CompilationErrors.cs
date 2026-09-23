@@ -106,6 +106,17 @@ public static class CompilationErrors
         helpLinkUri: "TODO",
         customTags: ["APIM", "ApiManagement"]);
 
+    public readonly static DiagnosticDescriptor BackendAllowsOnePolicy = new(
+        "APIM9990",
+        "Backend section allows only one policy",
+        "API Management allows only one policy in the backend section, but it has {0}. Wrap them in a policy such as choose or retry.",
+        "PolicyDocumentCompilation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Description.",
+        helpLinkUri: "TODO",
+        customTags: ["APIM", "ApiManagement"]);
+
     public readonly static DiagnosticDescriptor ArgumentCountMissMatchForPolicy = new(
         "APIM2001",
         "Argument count miss match for policy",
