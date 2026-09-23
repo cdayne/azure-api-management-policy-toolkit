@@ -23,11 +23,13 @@ internal class IncludeFragmentHandler : IPolicyHandler
         // 1. Check pre-registered fragments first
         if (!context.FragmentRegistry.TryGetValue(fragmentId, out var fragment))
         {
-            // 2. Scan all loaded assemblies for [Document("id", Type = DocumentType.Fragment)] classes
+            // 2. Scan all loaded assemblies for [Document] classes implementing IFragment, named as the compiler
+            //    names them
             var fragmentType = FindFragmentType(fragmentId)
                 ?? throw new InvalidOperationException(
                     $"Fragment '{fragmentId}' not found. Register it via RegisterFragment(\"{fragmentId}\", instance) " +
-                    $"or ensure a class with [Document(\"{fragmentId}\", Type = DocumentType.Fragment)] is loaded.");
+                    $"or ensure a class implementing IFragment named \"{fragmentId}\" by its [Document] attribute " +
+                    "or its class name is loaded.");
 
             fragment = (IFragment)Activator.CreateInstance(fragmentType)!;
         }
@@ -50,8 +52,13 @@ internal class IncludeFragmentHandler : IPolicyHandler
                     var docAttr = type.GetCustomAttributes(typeof(DocumentAttribute), false)
                         .OfType<DocumentAttribute>()
                         .FirstOrDefault();
+                    if (docAttr is null)
+                        continue;
 
-                    if (docAttr?.Name == fragmentId && docAttr.Type == DocumentType.Fragment)
+                    // The compiler names a document after the [Document] name, or after the class when the attribute
+                    // doesn't give one, and takes the document type from the attribute or the implemented interface.
+                    // Fragment ids are matched the way the fragment registry matches them.
+                    if (string.Equals(docAttr.Name ?? type.Name, fragmentId, StringComparison.OrdinalIgnoreCase))
                         return type;
                 }
             }
