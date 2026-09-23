@@ -141,7 +141,7 @@ public interface IOnErrorContext : IHaveExpressionContext
     /// <param name="config">
     /// Configuration specifying the Dapr binding name, operation, metadata, and other settings.
     /// </param>
-    void InvokeDarpBinding(InvokeDarpBindingConfig config);
+    void InvokeDaprBinding(InvokeDaprBindingConfig config);
 
     /// <summary>
     /// Converts JSON content to XML format.<br />
@@ -193,7 +193,7 @@ public interface IOnErrorContext : IHaveExpressionContext
     /// <param name="config">
     /// Configuration specifying the topic, content, and other optional settings for the publish-to-dapr policy.
     /// </param>
-    void PublishToDarp(PublishToDarpConfig config);
+    void PublishToDapr(PublishToDaprConfig config);
 
     /// <summary>
     /// Deletes header of specified name.<br />

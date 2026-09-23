@@ -10,11 +10,11 @@ namespace Microsoft.Azure.ApiManagement.PolicyToolkit.Testing.Emulator.Policies;
     Section(nameof(IOutboundContext)),
     Section(nameof(IOnErrorContext))
 ]
-internal class InvokeDarpBindingHandler : PolicyHandler<InvokeDarpBindingConfig>
+internal class InvokeDaprBindingHandler : PolicyHandler<InvokeDaprBindingConfig>
 {
-    public override string PolicyName => nameof(IInboundContext.InvokeDarpBinding);
+    public override string PolicyName => nameof(IInboundContext.InvokeDaprBinding);
 
-    protected override void Handle(GatewayContext context, InvokeDarpBindingConfig config)
+    protected override void Handle(GatewayContext context, InvokeDaprBindingConfig config)
     {
         // No-op by default in emulator.
         // Dapr binding invocation is not simulated in tests.

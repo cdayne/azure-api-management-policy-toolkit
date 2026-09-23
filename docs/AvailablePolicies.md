@@ -214,7 +214,7 @@ c.SendServiceBusMessage(new SendServiceBusMessageConfig
 });
 
 // Invoke Dapr binding
-c.InvokeDarpBinding(new InvokeDarpBindingConfig
+c.InvokeDaprBinding(new InvokeDaprBindingConfig
 {
     Name = "my-binding",
     Operation = "create",
@@ -222,7 +222,7 @@ c.InvokeDarpBinding(new InvokeDarpBindingConfig
 });
 
 // Publish to Dapr topic
-c.PublishToDarp(new PublishToDarpConfig
+c.PublishToDapr(new PublishToDaprConfig
 {
     Topic = "my-topic",
     PubSubName = "pubsub"
