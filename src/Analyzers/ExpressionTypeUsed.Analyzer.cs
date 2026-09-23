@@ -173,11 +173,14 @@ public class TypeUsedAnalyzer : DiagnosticAnalyzer
 
         #region Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions
 
+        "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.BasicAuthCredentials",
+        "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.DictionaryExtensions",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IApi",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IExpressionContext",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IContextApi",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IDeployment",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IGroup",
+        "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.Jwt",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.ILastError",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IMessageBody",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IAzureVnetInfo",
@@ -190,6 +193,7 @@ public class TypeUsedAnalyzer : DiagnosticAnalyzer
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.ISubscriptionKeyParameterNames",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IUrl",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IUser",
+        "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.StringExtensions",
         "Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions.IUserIdentity",
 
         #endregion Microsoft.Azure.ApiManagement.PolicyToolkit.Authoring.Expressions
@@ -297,19 +301,26 @@ public class TypeUsedAnalyzer : DiagnosticAnalyzer
         }
 
         var symbol = nodeSymbol.ContainingType;
+        if (symbol == null)
+        {
+            return;
+        }
+
+        // Indexers are named "this[]" in Roslyn; the allow lists use their metadata name ("Item").
+        var memberName = nodeSymbol is IPropertySymbol { IsIndexer: true } ? nodeSymbol.MetadataName : nodeSymbol.Name;
         var typeName = (symbol.IsGenericType ? symbol.OriginalDefinition : symbol)?.ToFullyQualifiedString() ?? "";
         if (AllowedTypes.Contains(typeName))
         {
-            if (AllowedInTypes.TryGetValue(typeName, out var allowed) && !allowed.Contains(nodeSymbol.Name))
+            if (AllowedInTypes.TryGetValue(typeName, out var allowed) && !allowed.Contains(memberName))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.TypeUsed.DisallowedMember, node.GetLocation(),
-                    nodeSymbol.Name));
+                    memberName));
             }
             else if (DisallowedInTypes.TryGetValue(typeName, out var disallowed) &&
-                     disallowed.Contains(nodeSymbol.Name))
+                     disallowed.Contains(memberName))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.TypeUsed.DisallowedMember, node.GetLocation(),
-                    nodeSymbol.Name));
+                    memberName));
             }
         }
         else
